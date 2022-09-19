@@ -6,29 +6,15 @@
 #include "esp_log.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
-#include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 
 #include "wifi.h"
 #include "mqtt.h"
-#define PIN 2
+#include "dht.h"
+
 
 xSemaphoreHandle wifiSemaphore;
 xSemaphoreHandle mqttSemaphore;
-
-void blink_led()
-{
-    gpio_pad_select_gpio(PIN);
-    gpio_set_direction(PIN, GPIO_MODE_OUTPUT);
-    int isOn = 0;
-    int time = 100; //short
-    while (true)
-    {
-        isOn = !isOn;
-        gpio_set_level(PIN, isOn);
-        vTaskDelay(time / portTICK_PERIOD_MS);    
-    } 
-}
 
 void conectadoWifi(void * params)
 {
@@ -51,17 +37,18 @@ void serverComunication(void * params)
   {
     while(true)
     {
-       float temperatura = 20.0 + (float)rand()/(float)(RAND_MAX/10.0);
-       sprintf(mensagem, "{\"Temperatura\": %f}", temperatura);
-       mqtt_send_message("v1/devices/me/telemetry", mensagem);
-       vTaskDelay(3000 / portTICK_PERIOD_MS);
+      float temperatura = 20.0 + (float)rand()/(float)(RAND_MAX/10.0);
+      sprintf(mensagem, "{\"Temperatura\": %f}", temperatura);
+      mqtt_send_message("v1/devices/me/telemetry", mensagem);
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
 
-       sprintf(jsonAtributos, "{\"qtd pinos\": 5, \n\"umidade\": 20}");
-       mqtt_send_message("v1/devices/me/attributes", jsonAtributos);
-       vTaskDelay(3000 / portTICK_PERIOD_MS);
+      sprintf(jsonAtributos, "{\"qtd pinos\": 5, \n\"umidade\": 20}");
+      mqtt_send_message("v1/devices/me/attributes", jsonAtributos);
+      vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
   }
 }
+
 
 void app_main() {
     
@@ -79,7 +66,7 @@ void app_main() {
 
     xTaskCreate(&conectadoWifi,  "Conexão ao MQTT", 4096, NULL, 1, NULL);
     xTaskCreate(&serverComunication, "Comunicação com Broker", 4096, NULL, 1, NULL);
-
-    xTaskCreate(&blink_led,  "Pisca led", 4096, NULL, 1, NULL);
+    dht_setup();
+    
 
 }
