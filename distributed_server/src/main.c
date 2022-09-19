@@ -11,6 +11,8 @@
 
 #include "wifi.h"
 #include "mqtt.h"
+
+#include <cJson.h>
 #define PIN 2
 
 xSemaphoreHandle wifiSemaphore;
@@ -44,19 +46,22 @@ void conectadoWifi(void * params)
 
 void serverComunication(void * params)
 {
-  char mensagem[200];
-  char jsonAtributos[200];
-
+  char *jsonAtributos;
+  cJSON *dados = NULL;
   if(xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
   {
     while(true)
     {
-       float temperatura = 20.0 + (float)rand()/(float)(RAND_MAX/10.0);
-       sprintf(mensagem, "{\"Temperatura\": %f}", temperatura);
-       mqtt_send_message("v1/devices/me/telemetry", mensagem);
+       float temperatura = 20.0f + (float)rand()/(float)(RAND_MAX/10.0);
+       dados = cJSON_CreateObject();
+       cJSON_AddItemToObject(dados, "temperatura", cJSON_CreateNumber(temperatura));
+       jsonAtributos = cJSON_Print(dados);
+       mqtt_send_message("v1/devices/me/telemetry", jsonAtributos);
        vTaskDelay(3000 / portTICK_PERIOD_MS);
 
-       sprintf(jsonAtributos, "{\"qtd pinos\": 5, \n\"umidade\": 20}");
+       dados = cJSON_CreateObject();
+       cJSON_AddItemToObject(dados, "umidade", cJSON_CreateNumber(100.9));
+       jsonAtributos = cJSON_Print(dados);
        mqtt_send_message("v1/devices/me/attributes", jsonAtributos);
        vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
