@@ -11,67 +11,42 @@
 #include "wifi.h"
 #include "mqtt.h"
 #include "dht.h"
-
-
-#include <cJson.h>
+#include "flame_sensor.h"
 
 xSemaphoreHandle wifiSemaphore;
 xSemaphoreHandle mqttSemaphore;
 
-void conectadoWifi(void * params)
+void conectadoWifi(void *params)
 {
-  while(true)
+  while (true)
   {
-    if(xSemaphoreTake(wifiSemaphore, portMAX_DELAY))
+    if (xSemaphoreTake(wifiSemaphore, portMAX_DELAY))
     {
       mqtt_start();
     }
   }
 }
 
-
-void serverComunication(void * params)
+void app_main()
 {
-  char *jsonAtributos;
-  cJSON *dados = NULL;
-  if(xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
+
+  // Inicializa o NVS
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
   {
-    while(true)
-    {
-       float temperatura = 20.0f + (float)rand()/(float)(RAND_MAX/10.0);
-       dados = cJSON_CreateObject();
-       cJSON_AddItemToObject(dados, "temperatura", cJSON_CreateNumber(temperatura));
-       jsonAtributos = cJSON_Print(dados);
-       mqtt_send_message("v1/devices/me/telemetry", jsonAtributos);
-       vTaskDelay(3000 / portTICK_PERIOD_MS);
-
-       dados = cJSON_CreateObject();
-       cJSON_AddItemToObject(dados, "umidade", cJSON_CreateNumber(100.9));
-       jsonAtributos = cJSON_Print(dados);
-       mqtt_send_message("v1/devices/me/attributes", jsonAtributos);
-       vTaskDelay(3000 / portTICK_PERIOD_MS);
-    }
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
   }
-}
+  ESP_ERROR_CHECK(ret);
 
+  wifiSemaphore = xSemaphoreCreateBinary();
+  mqttSemaphore = xSemaphoreCreateBinary();
+  wifi_start();
 
-void app_main() {
-    
-    // Inicializa o NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-    
-    wifiSemaphore = xSemaphoreCreateBinary();
-    mqttSemaphore = xSemaphoreCreateBinary();
-    wifi_start();
-
-    xTaskCreate(&conectadoWifi,  "Conexão ao MQTT", 4096, NULL, 1, NULL);
-    xTaskCreate(&serverComunication, "Comunicação com Broker", 4096, NULL, 1, NULL);
+  xTaskCreate(&conectadoWifi, "Conexão ao MQTT", 4096, NULL, 1, NULL);
+  if (xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
+  {
     dht_setup();
-    
-
+    setup_flame_sensor();
+  }
 }
