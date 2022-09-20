@@ -2,12 +2,19 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
+#include "esp_event.h"
+#include "esp_http_client.h"
+#include "esp_log.h"
+#include "freertos/semphr.h"
+#include "freertos/task.h"
+#include "freertos/FreeRTOS.h"
+
 #define PARTICAO "Atributos"
 
 
 int32_t le_valor_nvs(char *atributo){
   // Inicializa o NVS
-  esp_err_t ret = nvs_flash_init_partition(PARTICAO);
+  esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
   {
     ESP_ERROR_CHECK(nvs_flash_erase());
@@ -17,7 +24,7 @@ int32_t le_valor_nvs(char *atributo){
 
   // LE PARTICAO
   nvs_handle particao_handle;
-  esp_err_t res_nvs =  nvs_open_from_partition(PARTICAO, "armazenameto", NVS_READONLY, &particao_handle);
+  esp_err_t res_nvs =  nvs_open("armazenameto", NVS_READONLY, &particao_handle);
   int32_t valor = 0;
   if(res_nvs == ESP_ERR_NVS_NOT_FOUND){
     ESP_LOGE("NVS", "Namespace: armazenamento, não encontrado");
@@ -45,7 +52,7 @@ int32_t le_valor_nvs(char *atributo){
 
 void grava_valor_nvs(char *atributo, int32_t valor){
   // Inicializa o NVS
-  esp_err_t ret = nvs_flash_init_partition(PARTICAO);
+  esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
   {
     ESP_ERROR_CHECK(nvs_flash_erase());
@@ -55,8 +62,7 @@ void grava_valor_nvs(char *atributo, int32_t valor){
 
   // GRAVAR NA PARTICAO
   nvs_handle particao_handle;
-  esp_err_t res_nvs =  nvs_open_from_partition(PARTICAO, "armazenameto", NVS_READWRITE, &particao_handle);
-  int32_t valor = 0;
+  esp_err_t res_nvs =  nvs_open("armazenameto", NVS_READWRITE, &particao_handle);
   if(res_nvs == ESP_ERR_NVS_NOT_FOUND){
     ESP_LOGE("NVS", "Namespace: armazenamento, não encontrado");
   }

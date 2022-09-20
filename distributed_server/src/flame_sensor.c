@@ -28,6 +28,7 @@ void mqtt_published_flame(int msg, int type)
         cJSON_AddItemToObject(data, "Fogo", cJSON_CreateNumber(msg));
         mqtt_send_message("v1/devices/me/attributes", cJSON_Print(data));
         grava_valor_nvs("Fogo", data);
+        le_valor_nvs("Fogo");
     }else{
         cJSON_AddItemToObject(data, "Voltagem", cJSON_CreateNumber(msg));
         mqtt_send_message("v1/devices/me/telemetry", cJSON_Print(data));

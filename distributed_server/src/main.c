@@ -14,6 +14,9 @@
 
 #include "nvs_handler.h"
 
+#include "nvs.h"
+#include "nvs_flash.h"
+
 xSemaphoreHandle wifiSemaphore;
 xSemaphoreHandle mqttSemaphore;
 
@@ -31,7 +34,15 @@ void conectadoWifi(void *params)
 void app_main()
 {
   
-  int32_t resultado_leitura = le_valor_nvs("tem-fogo");
+  //int32_t resultado_leitura = le_valor_nvs("tem-fogo");
+
+  esp_err_t ret = nvs_flash_init();
+  if(ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+  {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
   
   wifiSemaphore = xSemaphoreCreateBinary();
   mqttSemaphore = xSemaphoreCreateBinary();
