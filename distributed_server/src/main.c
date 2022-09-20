@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "nvs_flash.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_http_client.h"
@@ -12,6 +11,8 @@
 #include "mqtt.h"
 #include "dht.h"
 #include "flame_sensor.h"
+
+#include "nvs_handler.h"
 
 xSemaphoreHandle wifiSemaphore;
 xSemaphoreHandle mqttSemaphore;
@@ -29,16 +30,9 @@ void conectadoWifi(void *params)
 
 void app_main()
 {
-
-  // Inicializa o NVS
-  esp_err_t ret = nvs_flash_init();
-  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-  {
-    ESP_ERROR_CHECK(nvs_flash_erase());
-    ret = nvs_flash_init();
-  }
-  ESP_ERROR_CHECK(ret);
-
+  
+  int32_t resultado_leitura = le_valor_nvs("tem-fogo");
+  
   wifiSemaphore = xSemaphoreCreateBinary();
   mqttSemaphore = xSemaphoreCreateBinary();
   wifi_start();
