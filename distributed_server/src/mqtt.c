@@ -22,6 +22,8 @@
 #include "cJson.h"
 #include "pwm.h"
 #include "buzzer.h"
+#include "dht.h"
+#include "flame_sensor.h"
 
 #define TAG "MQTT"
 #define MQTT_USERNAME CONFIG_ESP_MQTT_USERNAME
@@ -75,6 +77,28 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     mqtt_event_handler_cb(event_data);
 }
 
+void set_attributes_states(char *key, int value)
+{
+
+    printf("KEY: %s\n", key);
+    if (strcmp("setPwmValue", key) == 0)
+    {
+        set_pwm(value);
+    }
+    else if (strcmp("setBuzzerEnable", key) == 0)
+    {
+        set_buzzer_state(value);
+    }
+    else if (strcmp("setFlameSensorState", key) == 0)
+    {
+        set_flame_sensor_state(value);
+    }
+    else if (strcmp("setDhtState", key) == 0)
+    {
+        set_dht_state(value);
+    }
+}
+
 void mqtt_event_data_handler(char *data)
 {
     cJSON *json = cJSON_Parse(data);
@@ -82,14 +106,8 @@ void mqtt_event_data_handler(char *data)
         return;
     char *key = cJSON_GetObjectItem(json, "method")->valuestring;
     int value = cJSON_GetObjectItem(json, "params")->valueint;
-    printf("KEY: %s\n", key);
-    if (strcmp("setPwmValue", key) == 0)
-    {
-        set_pwm(value);
-    }
-    if (strcmp("setBuzzerEnable", key) == 0)
-    {
-        play_buzzer(value);
+    if(strstr(key, "set") != NULL){
+        set_attributes_states(key, value);
     }
 }
 void mqtt_start()

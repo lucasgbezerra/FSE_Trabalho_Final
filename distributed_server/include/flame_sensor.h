@@ -12,5 +12,6 @@ void setup_analog_flame_sensor(int PIN);
 void setup_digital_flame_sensor(int PIN);
 void mqtt_published_flame(int msg, int type);
 void fire_warning(int has_fire);
+void set_flame_sensor_state(int value);
 
 #endif

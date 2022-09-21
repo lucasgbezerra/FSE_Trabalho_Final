@@ -13,7 +13,7 @@
 #define FLAME_DAC_CHANNEL ADC2_CHANNEL_8
 #define TAG "FLAME"
 
-int is_on = 1;
+int flame_sensor_on = 1;
 
 void mqtt_published_flame(int msg, int type)
 {
@@ -28,7 +28,6 @@ void mqtt_published_flame(int msg, int type)
         cJSON_AddItemToObject(data, "tem_fogo", cJSON_CreateNumber(msg));
         mqtt_publish("v1/devices/me/attributes", cJSON_Print(data));
         write_value_nvs("tem_fogo", msg);
-        // read_nvs_value("tem_fogo");
     }
     else
     {
@@ -50,27 +49,28 @@ void check_flame()
     int count = 0;
     while (true)
     {
-        if (!is_on)
-            continue;
-        count++;
-        voltage = adc1_get_raw(FLAME_ADC_CHANNEL);
-        has_fire = gpio_get_level(GPIO_NUM_25);
-        switch (has_fire)
+        if (flame_sensor_on)
         {
-        case 0:
-            fire_warning(has_fire);
-            break;
-        case 1:
-            ESP_LOGI(TAG, "Fogo detectado!");
-            fire_warning(has_fire);
-            break;
-        default:
-            break;
+            count++;
+            voltage = adc1_get_raw(FLAME_ADC_CHANNEL);
+            has_fire = gpio_get_level(GPIO_NUM_25);
+            switch (has_fire)
+            {
+            case 0:
+                fire_warning(has_fire);
+                break;
+            case 1:
+                ESP_LOGI(TAG, "Fogo detectado!");
+                fire_warning(has_fire);
+                break;
+            default:
+                break;
+            }
+            ESP_LOGI(TAG, "Voltagem: %d | Fogo: %d", voltage, has_fire);
+            mqtt_published_flame(voltage, TELEMETRY);
+            count = 0;
         }
-        ESP_LOGI(TAG, "Voltagem: %d | Fogo: %d", voltage, has_fire);
-        mqtt_published_flame(voltage, TELEMETRY);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        count = 0;
     }
 }
 
@@ -96,4 +96,9 @@ void setup_digital_flame_sensor(int PIN)
 {
     gpio_pad_select_gpio(PIN);
     gpio_set_direction(PIN, GPIO_MODE_INPUT);
+}
+
+void set_flame_sensor_state(int value)
+{
+    flame_sensor_on = value;
 }
