@@ -35,7 +35,7 @@ int32_t le_valor_nvs(char *atributo){
     switch (res_leitura)
     {
     case ESP_OK:
-      printf("Valor armazenado: %d\n", valor);
+      // printf("Valor armazenado: %d\n", valor);
       break;
     case ESP_ERR_NOT_FOUND:
       ESP_LOGE("NVS", "Valor não encontrado\n");  

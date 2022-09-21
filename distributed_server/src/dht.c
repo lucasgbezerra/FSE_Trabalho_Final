@@ -27,17 +27,17 @@ void mqtt_published_dht11(void *temperature, void *humidity, int type)
         float temp = *(float *)temperature;
         float umd = *(float *)humidity;
 
-        cJSON_AddItemToObject(data, "Temperatura Média", cJSON_CreateNumber(temp));
-        cJSON_AddItemToObject(data, "Umidade Média", cJSON_CreateNumber(umd));
-        mqtt_send_message("v1/devices/me/attributes", cJSON_Print(data));
+        cJSON_AddItemToObject(data, "temperatura_media", cJSON_CreateNumber(temp));
+        cJSON_AddItemToObject(data, "umidade_media", cJSON_CreateNumber(umd));
+        mqtt_publish("v1/devices/me/attributes", cJSON_Print(data));
     }
     else
     {
         int temp = *(int *)temperature;
         int umd = *(int *)humidity;
-        cJSON_AddItemToObject(data, "Temperatura", cJSON_CreateNumber(temp));
-        cJSON_AddItemToObject(data, "Umidade", cJSON_CreateNumber(umd));
-        mqtt_send_message("v1/devices/me/telemetry", cJSON_Print(data));
+        cJSON_AddItemToObject(data, "temperatura", cJSON_CreateNumber(temp));
+        cJSON_AddItemToObject(data, "umidade", cJSON_CreateNumber(umd));
+        mqtt_publish("v1/devices/me/telemetry", cJSON_Print(data));
     }
 }
 
@@ -59,13 +59,13 @@ void read_dht11()
             last_temperature = dht11_data.temperature;
             avg_humidity = (last_humidity + dht11_data.humidity) / 2.0;
             last_humidity = dht11_data.humidity;
-            ESP_LOGI(TAG, "LAST => [Temperatura]: %d | [Umidade]: %d", last_temperature, last_humidity);
+            ESP_LOGI(TAG, "LAST => [temperatura]: %d | [umidade]: %d", last_temperature, last_humidity);
             mqtt_published_dht11(&last_temperature, &last_humidity, TELEMETRY);
             count++;
         }
         if (count == 5)
         {
-            ESP_LOGI(TAG, "AVERAGE => [Temperatura]: %.2f | [Umidade]: %.2f", avg_temperature, avg_humidity);
+            ESP_LOGI(TAG, "AVERAGE => [temperatura]: %.2f | [umidade]: %.2f", avg_temperature, avg_humidity);
             mqtt_published_dht11(&avg_temperature, &avg_humidity, ATTRIBUTE);
             count = 0;
         }

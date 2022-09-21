@@ -19,6 +19,8 @@
 #include "mqtt_client.h"
 
 #include "mqtt.h"
+#include "cJson.h"
+#include "pwm.h"
 
 #define TAG "MQTT"
 #define MQTT_USERNAME CONFIG_ESP_MQTT_USERNAME
@@ -53,6 +55,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
+        mqtt_data_handler(event->data);
         break;
     case MQTT_EVENT_ERROR:
         ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
@@ -70,6 +73,19 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     mqtt_event_handler_cb(event_data);
 }
 
+void mqtt_data_handler(char *data)
+{
+    printf("Handle\n");
+    cJSON *json = cJSON_Parse(data);
+    if (json == NULL)
+        return;
+    cJSON *value_pwm = cJSON_GetObjectItem(json, "params");
+    cJSON *key = cJSON_GetObjectItem(json, "method");
+    // if(strcmp(key->valuestring, "setPwmValue")){
+    set_pwm(value_pwm->valueint);
+    // }
+
+}
 void mqtt_start()
 {
     esp_mqtt_client_config_t mqtt_config = {
@@ -80,8 +96,14 @@ void mqtt_start()
     esp_mqtt_client_start(client);
 }
 
-void mqtt_send_message(char *topico, char *mensagem)
+void mqtt_publish(char *topic, char *message)
 {
-    int message_id = esp_mqtt_client_publish(client, topico, mensagem, 0, 1, 0);
-    ESP_LOGI(TAG, "Mesnagem enviada, ID: %d", message_id);
+    int message_id = esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
+    ESP_LOGI(TAG, "Mensagem publish enviada, ID: %d", message_id);
+}
+
+void mqtt_subscribe(char *topic)
+{
+    int message_id = esp_mqtt_client_subscribe(client, topic, 0);
+    ESP_LOGI(TAG, "Subscribe mensagem: %d no topico: %s", message_id, topic); 
 }

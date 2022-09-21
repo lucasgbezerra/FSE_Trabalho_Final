@@ -25,13 +25,13 @@ void mqtt_published_flame(int msg, int type)
     }
     if (type == ATTRIBUTE)
     {
-        cJSON_AddItemToObject(data, "Fogo", cJSON_CreateNumber(msg));
-        mqtt_send_message("v1/devices/me/attributes", cJSON_Print(data));
-        grava_valor_nvs("Fogo", data);
-        le_valor_nvs("Fogo");
+        cJSON_AddItemToObject(data, "tem_fogo", cJSON_CreateNumber(msg));
+        mqtt_publish("v1/devices/me/attributes", cJSON_Print(data));
+        grava_valor_nvs("tem_fogo", msg);
+        // le_valor_nvs("tem_fogo");
     }else{
-        cJSON_AddItemToObject(data, "Voltagem", cJSON_CreateNumber(msg));
-        mqtt_send_message("v1/devices/me/telemetry", cJSON_Print(data));
+        cJSON_AddItemToObject(data, "voltagem", cJSON_CreateNumber(msg));
+        mqtt_publish("v1/devices/me/telemetry", cJSON_Print(data));
     }
 }
 
