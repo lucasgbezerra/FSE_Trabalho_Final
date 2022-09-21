@@ -6,7 +6,13 @@
 #include "pwm.h"
 
 #define LED 2
-
+void stored_pwm_config(){
+    int value = read_nvs_value("pwm_value");
+    if (value != -1)
+    {
+        set_pwm(value);
+    }
+}
 void config_pwm()
 {
     char topic[128];
@@ -30,16 +36,13 @@ void config_pwm()
     sprintf(topic, "v1/devices/me/rpc/request/+");
     mqtt_subscribe(topic);
 
-    int value = le_valor_nvs("pwm_value");
-    if (value != -1)
-    {
-        set_pwm(value);
-    }
+    stored_pwm_config();
+
 }
 
 void set_pwm(int value)
 {
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, value * 2.5);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
-    grava_valor_nvs("pwm_value", value);
+    write_value_nvs("pwm_value", value);
 }
