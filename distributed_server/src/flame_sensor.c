@@ -2,11 +2,11 @@
 #include "freertos/task.h"
 #include "driver/adc.h"
 #include "esp_log.h"
-// #include "driver/dac.h"
 #include "cJson.h"
-#include "mqtt.h"
 
+#include "mqtt.h"
 #include "nvs_handler.h"
+#include "buzzer.h"
 
 #define FLAME_ADC_CHANNEL ADC1_CHANNEL_7
 #define FLAME_DAC_CHANNEL ADC2_CHANNEL_8
@@ -29,7 +29,9 @@ void mqtt_published_flame(int msg, int type)
         mqtt_publish("v1/devices/me/attributes", cJSON_Print(data));
         write_value_nvs("tem_fogo", msg);
         // read_nvs_value("tem_fogo");
-    }else{
+    }
+    else
+    {
         cJSON_AddItemToObject(data, "voltagem", cJSON_CreateNumber(msg));
         mqtt_publish("v1/devices/me/telemetry", cJSON_Print(data));
     }
@@ -49,21 +51,20 @@ void check_flame()
         {
         case 0:
             mqtt_published_flame(has_fire, ATTRIBUTE);
+            play_buzzer(0);
             break;
         case 1:
             ESP_LOGI(TAG, "Fogo detectado!");
             mqtt_published_flame(has_fire, ATTRIBUTE);
+            play_buzzer(1);
             break;
         default:
             break;
         }
+        ESP_LOGI(TAG, "Voltagem: %d | Fogo: %d", voltage, has_fire);
+        mqtt_published_flame(voltage, TELEMETRY);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        if (count == 10)
-        {
-            ESP_LOGI(TAG, "Voltage: %d | Fire: %d", voltage, has_fire);
-            mqtt_published_flame(voltage, TELEMETRY);
-            count = 0;
-        }
+        count = 0;
     }
 }
 
@@ -73,7 +74,7 @@ void setup_flame_sensor()
     gpio_pad_select_gpio(GPIO_NUM_33);
     gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
 
-    adc1_config_width(ADC_WIDTH_12Bit);
+    adc1_config_width(ADC_WIDTH_10Bit);
     adc1_config_channel_atten(FLAME_ADC_CHANNEL, ADC_ATTEN_0db);
 
     // Digital

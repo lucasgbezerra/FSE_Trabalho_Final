@@ -9,6 +9,7 @@
 #include "dht.h"
 #include "flame_sensor.h"
 #include "nvs_handler.h"
+#include "buzzer.h"
 
 extern xSemaphoreHandle mqtt_semaphore;
 
@@ -19,6 +20,7 @@ void app_main()
   connections();
    if (xSemaphoreTake(mqtt_semaphore, portMAX_DELAY))
     {
+      buzzer_setup();
       config_pwm();
       dht_setup();
       setup_flame_sensor();

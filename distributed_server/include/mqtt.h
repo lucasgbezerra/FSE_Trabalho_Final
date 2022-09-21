@@ -3,7 +3,7 @@
 
 void mqtt_start();
 void mqtt_publish(char *topic, char *menssage);
-void mqtt_subscribe(char *topic);
-void mqtt_data_handler(char *data);
+int mqtt_subscribe(char *topic);
+void mqtt_event_data_handler(char *data);
 
 #endif

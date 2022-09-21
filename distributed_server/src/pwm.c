@@ -1,7 +1,6 @@
 #include "freertos/FreeRTOS.h"
 #include "driver/ledc.h"
-#include "mqtt.h"
-#include "string.h"
+
 #include "nvs_handler.h"
 #include "pwm.h"
 
@@ -15,7 +14,6 @@ void stored_pwm_config(){
 }
 void config_pwm()
 {
-    char topic[128];
     ledc_timer_config_t timer_config = {
         .speed_mode = LEDC_LOW_SPEED_MODE,
         .duty_resolution = LEDC_TIMER_8_BIT,
@@ -33,11 +31,7 @@ void config_pwm()
         .duty = 0,
         .hpoint = 0};
     ledc_channel_config(&channel_config);
-    sprintf(topic, "v1/devices/me/rpc/request/+");
-    mqtt_subscribe(topic);
-
     stored_pwm_config();
-
 }
 
 void set_pwm(int value)

@@ -60,17 +60,17 @@ void read_dht11()
             avg_humidity = (last_humidity + dht11_data.humidity) / 2.0;
             last_humidity = dht11_data.humidity;
             ESP_LOGI(TAG, "LAST => [temperatura]: %d | [umidade]: %d", last_temperature, last_humidity);
+            ESP_LOGI(TAG, "AVERAGE => [temperatura]: %.2f | [umidade]: %.2f", avg_temperature, avg_humidity);
             mqtt_published_dht11(&last_temperature, &last_humidity, TELEMETRY);
+            mqtt_published_dht11(&avg_temperature, &avg_humidity, ATTRIBUTE);
             count++;
         }
-        if (count == 5)
-        {
-            ESP_LOGI(TAG, "AVERAGE => [temperatura]: %.2f | [umidade]: %.2f", avg_temperature, avg_humidity);
-            mqtt_published_dht11(&avg_temperature, &avg_humidity, ATTRIBUTE);
-            count = 0;
-        }
+        // if (count == 5)
+        // {
+        //     count = 0;
+        // }
 
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 

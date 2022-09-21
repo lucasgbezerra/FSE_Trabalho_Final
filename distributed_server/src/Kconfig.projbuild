@@ -32,3 +32,17 @@ menu "Configuração Servidor Central"
         help
             Token de acesso do dispositivo no ThingsBoard
 endmenu
+
+menu "Modo de Funcionamento"
+
+    choice ESP_MODE
+        prompt "Selecione o modo de Funcionamento do dispositivo"
+        default MODE_ENERGY
+
+        config MODE_ENERGY
+            bool "Energia"
+        config MODE_BATTERY
+            bool "Bateria"
+    endchoice
+
+endmenu
