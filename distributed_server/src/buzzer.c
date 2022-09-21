@@ -4,8 +4,7 @@
 #include "esp_log.h"
 #include "cJson.h"
 #include "mqtt.h"
-
-#define BUZZER_PIN 27
+#include "buzzer.h"
 
 void play_buzzer(int value)
 {

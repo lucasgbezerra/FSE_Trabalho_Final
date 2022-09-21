@@ -44,7 +44,6 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
         break;
-
     case MQTT_EVENT_SUBSCRIBED:
         ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
         break;
@@ -76,26 +75,6 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     mqtt_event_handler_cb(event_data);
 }
 
-void set_state(char *key, int value)
-{
-    if(strcmp("setPwmValue", key) == 0){
-        set_pwm(value);
-    }
-    if(strcmp("setBuzzerValue", key) == 0){
-        play_buzzer(value);
-    }
-}
-
-// void get_state(char *key, int value)
-// {
-//     if(strcmp("setPwmValue", key) == 0){
-//         set_pwm(value);
-//     }
-//     if(strcmp("setBuzzerValue", key) == 0){
-//         play_buzzer(value);
-//     }
-// }
-
 void mqtt_event_data_handler(char *data)
 {
     cJSON *json = cJSON_Parse(data);
@@ -104,16 +83,14 @@ void mqtt_event_data_handler(char *data)
     char *key = cJSON_GetObjectItem(json, "method")->valuestring;
     int value = cJSON_GetObjectItem(json, "params")->valueint;
     printf("KEY: %s\n", key);
-    if(strcmp("setPwmValue", key) == 0){
+    if (strcmp("setPwmValue", key) == 0)
+    {
         set_pwm(value);
     }
-    if(strcmp("setBuzzerEnable", key) == 0){
+    if (strcmp("setBuzzerEnable", key) == 0)
+    {
         play_buzzer(value);
     }
-    // else{
-    //     get_state(key, value);
-    // }
-   
 }
 void mqtt_start()
 {
@@ -136,4 +113,14 @@ int mqtt_subscribe(char *topic)
     int message_id = esp_mqtt_client_subscribe(client, topic, 0);
     ESP_LOGI(TAG, "Subscribe mensagem: %d no topico: %s", message_id, topic);
     return message_id;
+}
+void mqtt_restart()
+{
+    esp_mqtt_client_start(client);
+    ESP_LOGI(TAG, "Reiniciado");
+}
+void mqtt_stop()
+{
+    esp_mqtt_client_stop(client);
+    ESP_LOGI(TAG, "Parado");
 }

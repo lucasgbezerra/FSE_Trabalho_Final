@@ -7,13 +7,13 @@
 #include "mqtt.h"
 #include "nvs_handler.h"
 #include "buzzer.h"
+#include "flame_sensor.h"
 
 #define FLAME_ADC_CHANNEL ADC1_CHANNEL_7
 #define FLAME_DAC_CHANNEL ADC2_CHANNEL_8
 #define TAG "FLAME"
 
-#define ATTRIBUTE 0
-#define TELEMETRY 1
+int is_on = 1;
 
 void mqtt_published_flame(int msg, int type)
 {
@@ -37,6 +37,12 @@ void mqtt_published_flame(int msg, int type)
     }
 }
 
+void fire_warning(int has_fire)
+{
+    mqtt_published_flame(has_fire, ATTRIBUTE);
+    play_buzzer(has_fire);
+}
+
 void check_flame()
 {
     int voltage = 0;
@@ -44,19 +50,19 @@ void check_flame()
     int count = 0;
     while (true)
     {
+        if (!is_on)
+            continue;
         count++;
         voltage = adc1_get_raw(FLAME_ADC_CHANNEL);
         has_fire = gpio_get_level(GPIO_NUM_25);
         switch (has_fire)
         {
         case 0:
-            mqtt_published_flame(has_fire, ATTRIBUTE);
-            play_buzzer(0);
+            fire_warning(has_fire);
             break;
         case 1:
             ESP_LOGI(TAG, "Fogo detectado!");
-            mqtt_published_flame(has_fire, ATTRIBUTE);
-            play_buzzer(1);
+            fire_warning(has_fire);
             break;
         default:
             break;
@@ -71,15 +77,23 @@ void check_flame()
 void setup_flame_sensor()
 {
     // Analogica
-    gpio_pad_select_gpio(GPIO_NUM_33);
-    gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
+    setup_analog_flame_sensor(FLAME_ANALOG_PIN);
+    // Digital
+    setup_digital_flame_sensor(FLAME_DIGITAL_PIN);
+    xTaskCreate(&check_flame, "Sensor de chama", 4096, NULL, 1, NULL);
+}
+
+void setup_analog_flame_sensor(int PIN)
+{
+    gpio_pad_select_gpio(PIN);
+    gpio_set_direction(PIN, GPIO_MODE_INPUT);
 
     adc1_config_width(ADC_WIDTH_10Bit);
     adc1_config_channel_atten(FLAME_ADC_CHANNEL, ADC_ATTEN_0db);
+}
 
-    // Digital
-    gpio_pad_select_gpio(GPIO_NUM_25);
-    gpio_set_direction(GPIO_NUM_25, GPIO_MODE_INPUT);
-
-    xTaskCreate(&check_flame, "Sensor de chama", 4096, NULL, 1, NULL);
+void setup_digital_flame_sensor(int PIN)
+{
+    gpio_pad_select_gpio(PIN);
+    gpio_set_direction(PIN, GPIO_MODE_INPUT);
 }
