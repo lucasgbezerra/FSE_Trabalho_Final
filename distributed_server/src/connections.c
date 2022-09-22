@@ -14,6 +14,7 @@
 #include "dht.h"
 #include "flame_sensor.h"
 #include "buzzer.h"
+#include "nvs_handler.h"
 
 extern xSemaphoreHandle wifi_semaphore;
 extern xSemaphoreHandle mqtt_semaphore;
@@ -29,6 +30,11 @@ void wifi_connect()
   }
 }
 
+void get_storage_state()
+{
+  int pwm = read_nvs_value("pwm_value");
+  set_pwm(pwm);
+}
 void connections()
 {
 
@@ -38,6 +44,7 @@ void connections()
   {
 
     config_pwm();
+    get_storage_state();
     if (OPERATION_MODE == BATTERY_MODE)
     {
       ESP_LOGI("MODO", "Funcionamento via bateria");

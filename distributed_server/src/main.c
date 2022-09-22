@@ -13,8 +13,6 @@
 #include "connections.h"
 #include "low_power.h"
 
-#define TAG "MODO"
-
 xSemaphoreHandle wifi_semaphore;
 xSemaphoreHandle wifi_reconnect_semaphore;
 xSemaphoreHandle mqtt_semaphore;

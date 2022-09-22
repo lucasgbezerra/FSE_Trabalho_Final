@@ -24,11 +24,6 @@ extern xSemaphoreHandle wifi_semaphore;
 extern xSemaphoreHandle mqtt_semaphore;
 extern xSemaphoreHandle wifi_reconnect_semaphore;
 
-int read_gpio(int pin)
-{
-    return gpio_get_level(pin);
-}
-
 
 cJSON * create_attributes_json()
 {
@@ -38,7 +33,7 @@ cJSON * create_attributes_json()
         ESP_LOGE("LOW POWER", "Erro ao criar JSON");
         return NULL;
     }
-    cJSON_AddItemToObject(data, "tem_fogo", cJSON_CreateNumber(read_gpio(FLAME_DIGITAL_PIN)));
+    cJSON_AddItemToObject(data, "tem_fogo", cJSON_CreateNumber(low_flame_sensor()));
     cJSON_AddItemToObject(data, "temperatura_media", cJSON_CreateNumber(low_power_read('T')));
     cJSON_AddItemToObject(data, "umidade_media", cJSON_CreateNumber(low_power_read('U')));
     cJSON_AddItemToObject(data, "status_led", cJSON_CreateNumber(get_pwm_value()));

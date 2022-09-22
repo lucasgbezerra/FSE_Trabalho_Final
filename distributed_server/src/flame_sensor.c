@@ -103,3 +103,18 @@ void set_flame_sensor_state(int value)
     flame_sensor_on = value;
     write_value_nvs("flame_sensor", flame_sensor_on);
 }
+
+int low_flame_sensor()
+{
+    setup_digital_flame_sensor(FLAME_DIGITAL_PIN);
+    int has_fire = gpio_get_level(FLAME_DIGITAL_PIN);
+
+    if (has_fire)
+    {
+        buzzer_setup();
+        play_buzzer(1);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        play_buzzer(0);
+    }
+    return has_fire;
+}
