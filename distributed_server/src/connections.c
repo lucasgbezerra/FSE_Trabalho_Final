@@ -6,7 +6,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
-#include "driver/gpio.h"
 
 #include "connections.h"
 #include "wifi.h"
@@ -15,7 +14,6 @@
 #include "dht.h"
 #include "flame_sensor.h"
 #include "buzzer.h"
-#include "nvs_handler.h"
 
 extern xSemaphoreHandle wifi_semaphore;
 extern xSemaphoreHandle mqtt_semaphore;
@@ -31,14 +29,6 @@ void wifi_connect()
   }
 }
 
-// void mqtt_connect()
-// {
-//   while (true)
-//   {
-
-//   }
-// }
-
 void connections()
 {
 
@@ -47,6 +37,7 @@ void connections()
   if (xSemaphoreTake(mqtt_semaphore, portMAX_DELAY))
   {
 
+    config_pwm();
     if (OPERATION_MODE == BATTERY_MODE)
     {
       ESP_LOGI("MODO", "Funcionamento via bateria");
@@ -55,14 +46,10 @@ void connections()
     else
     {
       ESP_LOGI("MODO", "Funcionamento via energia");
-      // if (xSemaphoreTake(mqtt_semaphore, portMAX_DELAY))
-      // {
+
       buzzer_setup();
-      config_pwm();
       setup_flame_sensor();
       dht_setup();
     }
   }
-
-  // xTaskCreate(&mqtt_connect, "MQTT", 4096, NULL, 1, NULL);
 }

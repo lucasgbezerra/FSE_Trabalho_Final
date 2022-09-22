@@ -13,6 +13,10 @@
 #include "buzzer.h"
 #include "wifi.h"
 #include "mqtt.h"
+#include "pwm.h"
+#include "dht.h"
+
+
 
 #define BUTTON 0
 
@@ -25,6 +29,23 @@ int read_gpio(int pin)
     return gpio_get_level(pin);
 }
 
+
+cJSON * create_attributes_json()
+{
+    cJSON *data = cJSON_CreateObject();
+    if (data == NULL)
+    {
+        ESP_LOGE("LOW POWER", "Erro ao criar JSON");
+        return NULL;
+    }
+    cJSON_AddItemToObject(data, "tem_fogo", cJSON_CreateNumber(read_gpio(FLAME_DIGITAL_PIN)));
+    cJSON_AddItemToObject(data, "temperatura_media", cJSON_CreateNumber(low_power_read('T')));
+    cJSON_AddItemToObject(data, "umidade_media", cJSON_CreateNumber(low_power_read('U')));
+    cJSON_AddItemToObject(data, "status_led", cJSON_CreateNumber(get_pwm_value()));
+
+    return data;
+
+}
 void battery_mode()
 {
     gpio_pad_select_gpio(BUTTON);
@@ -49,10 +70,12 @@ void battery_mode()
             if (xSemaphoreTake(wifi_reconnect_semaphore, portMAX_DELAY))
             {
                 mqtt_restart();
-                cJSON_AddItemToObject(data, "tem_fogo", cJSON_CreateNumber(read_gpio(FLAME_DIGITAL_PIN)));
+                data = create_attributes_json();
+                if(data != NULL)
+                    mqtt_publish("v1/devices/me/attributes", cJSON_Print(data));
             }
 
-            vTaskDelay(pdMS_TO_TICKS(500));
+            vTaskDelay(pdMS_TO_TICKS(100));
         }
     }
 }

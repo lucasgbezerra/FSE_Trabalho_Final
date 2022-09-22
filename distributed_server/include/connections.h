@@ -16,5 +16,6 @@ void wifi_connect();
 void mqtt_connect();
 void connections();
 void battery_mode();
+void set_values_states();
 
 #endif

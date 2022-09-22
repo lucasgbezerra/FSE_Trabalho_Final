@@ -38,4 +38,5 @@ void mqtt_published_buzzer()
 
 void set_buzzer_state(int value){
     buzzer_on = value;
+    write_value_nvs("buzzer_ligado", buzzer_on);
 }

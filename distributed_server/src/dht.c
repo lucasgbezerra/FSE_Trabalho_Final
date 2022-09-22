@@ -43,7 +43,30 @@ void mqtt_published_dht11(void *temperature, void *humidity, int type)
         mqtt_publish("v1/devices/me/telemetry", cJSON_Print(data));
     }
 }
+int low_power_read(char option)
+{
+    DHT11_init(DHT11_PIN);
+    
+    struct dht11_reading dht11_data;
+    int last_humidity = -1;
+    int last_temperature = -1;
+    
 
+    dht11_data = DHT11_read();
+    if (dht11_data.status == DHT11_OK)
+    {
+        last_humidity = dht11_data.humidity;
+        last_temperature = dht11_data.temperature;
+    }
+    if (option == 'T')
+    {
+        return last_temperature;
+    }
+    else
+    {
+        return last_humidity;
+    }
+}
 void read_dht11()
 {
     float avg_temperature = 0.0;
@@ -88,4 +111,5 @@ void dht_setup()
 void set_dht_state(int value)
 {
     dht11_on = value;
+    write_value_nvs("dht11", dht11_on);
 }

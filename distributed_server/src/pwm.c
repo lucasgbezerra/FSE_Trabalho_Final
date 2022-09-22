@@ -40,3 +40,8 @@ void set_pwm(int value)
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
     write_value_nvs("pwm_value", value);
 }
+
+int get_pwm_value()
+{
+    return ledc_get_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+}

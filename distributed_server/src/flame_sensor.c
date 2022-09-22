@@ -101,4 +101,5 @@ void setup_digital_flame_sensor(int PIN)
 void set_flame_sensor_state(int value)
 {
     flame_sensor_on = value;
+    write_value_nvs("flame_sensor", flame_sensor_on);
 }
