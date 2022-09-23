@@ -32,7 +32,7 @@ A partir da Dashboard(interface interativa) é possível ativar e desativar os s
 git clone https://github.com/lucasgbezerra/FSE_Trabalho_Final.git
 ```
 Para utilizar o Plataform IO:
-- Abra o projeto pelo Plataform IO
+- Abra a pasta `distributed_server` do projeto pelo Plataform IO
 
 ### Antes de executar
 - Entre no menu de execução a partir de um terminal do PlataformIO
