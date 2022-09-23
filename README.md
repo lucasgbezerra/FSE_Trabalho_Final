@@ -5,6 +5,7 @@ Esse projeto é uma implementação de atuadores distribuídos baseados nos micr
 Para mais informações accesse o link do [enunciado](https://gitlab.com/fse_fga/trabalhos-2022_1/trabalho-3-2022-1).
 
 ## Vídeo de demonstração
+[![Video](https://img.youtube.com/vi/J2kknIzbed4/maxresdefault.jpg)](https://youtu.be/J2kknIzbed4)
 
 ## Características
 ### Hardware
@@ -13,6 +14,14 @@ O Projeto possui:
 - 1 Sensor de chama (KY 026)
 - 1 Sensor de temperatura e umidade (DHT11)
 - 1 Buzzer ativo
+
+### Pinagem
+- Sensor de chama analógico (GPIO33)
+- Sensor de chama digital (GPIO25)
+- Buzzer (GPIO27)
+- DHT11 (GPIO4)
+- Botão da ESP32 (GPIO0)
+- LED ESP32 (GPIO2)
 
 ### Descrição
 O projeto busca implementar uma espécie de detector de fogo, os sensores trabalham em conjunto para emitir um aviso de fogo próximo. Desta forma, quando o sendor Ky-026 detecta fogo ele ativa o buzzer que emite um som e envia para o Dashboard(interface interativa) um sinal luminoso a partir de um led vermelho que acende.
@@ -43,7 +52,7 @@ pio run -t menuconfig
 
 - Acesse o menu **Configuração do Wifi** e adicione suas informações de rede de ssid e senha
 
-- Acesse o menu **Configuração do Servidor Central** e adicione as informações de IP do Broker e o token de acesso do dispositivo no ThingsBoard.
+- Acesse o menu **Configuração do Servidor Central** e adicione as informações de IP do Broker e o token de acesso do dispositivo(ESP32-Estevao-Lucas) no ThingsBoard.
 
 - Acesse o menu  **Modo de Funcionamento** e selecione o modo desejado (Bateria ou Energia)
 
@@ -51,9 +60,8 @@ pio run -t menuconfig
     - Acesse o menu do PlataformIO e clique na opção erase flash (a ESP32 deve estar conectada)
 
 ### Executar
-- Acesse o menu do PlataformIO e clique na opçao ;General->Build (ESP32 deve estar conectada). Após a build basta clicar na opção General->Upload and Monitor.
+- Acesse o menu do PlataformIO e clique na opçao General->Build (ESP32 deve estar conectada). Após a build basta clicar na opção General->Upload and Monitor.
 
 ### Utilização
-
-- Visualize as informações dos sensores na Dashboard (ESP32 Estevao-Lucas) e acione alguns botões.
+- Visualize as informações dos sensores na Dashboard (ESP32-Estevao-Lucas) e acione alguns botões.
 Para ativar o sensor de fogo basta aproximar o fogo do sensor de chama.
